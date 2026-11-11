@@ -59,9 +59,9 @@ annual_exports["yoy_growth_pct"] = (
 )
 
 # Display results
-print("\n========== ANNUAL EXPORT PERFORMANCE ==========")
+# print("\n========== ANNUAL EXPORT PERFORMANCE ==========")
 
-print(annual_exports.to_string(index=False))
+# print(annual_exports.to_string(index=False))
 
 # ==========================================
 # 2. HIGHEST AND LOWEST EXPORT YEARS
@@ -75,19 +75,19 @@ lowest_year = annual_exports.loc[
     annual_exports["total_exports_usd_mn"].idxmin()
 ]
 
-print("\n========== EXPORT PERFORMANCE HIGHLIGHTS ==========")
+# print("\n========== EXPORT PERFORMANCE HIGHLIGHTS ==========")
 
-print(
-    f"Highest exports: {highest_year['financial_year']} "
-    f"(USD {highest_year['total_exports_usd_mn']} million)"
-)
+# print(
+#     f"Highest exports: {highest_year['financial_year']} "
+#     f"(USD {highest_year['total_exports_usd_mn']} million)"
+# )
 
-print(
-    f"Lowest exports: {lowest_year['financial_year']} "
-    f"(USD {lowest_year['total_exports_usd_mn']} million)"
-)
+# print(
+#     f"Lowest exports: {lowest_year['financial_year']} "
+#     f"(USD {lowest_year['total_exports_usd_mn']} million)"
+# )
 
-print("\nAnnual export analysis completed.")
+# print("\nAnnual export analysis completed.")
 
 # ==========================================
 # 3. TOP 10 EXPORT COMMODITIES - 2025-26
@@ -403,19 +403,19 @@ columns_to_display = [
     "share_pct"
 ]
 
-print("\n========== EXPORT VALUE: FASTEST-GROWING COMMODITIES ==========")
+# print("\n========== EXPORT VALUE: FASTEST-GROWING COMMODITIES ==========")
 
-print(
-    top_10_cagr[columns_to_display].to_string(index=False)
-)
+# print(
+#     top_10_cagr[columns_to_display].to_string(index=False)
+# )
 
-print("\n========== EXPORT VALUE: SLOWEST-GROWING COMMODITIES ==========")
+# print("\n========== EXPORT VALUE: SLOWEST-GROWING COMMODITIES ==========")
 
-print(
-    bottom_10_cagr[columns_to_display].to_string(index=False)
-)
+# print(
+#     bottom_10_cagr[columns_to_display].to_string(index=False)
+# )
 
-print("\nExport value comparison completed.")
+# print("\nExport value comparison completed.")
 
 # ==========================================
 # 10. LARGEST ABSOLUTE EXPORT CHANGES
@@ -443,16 +443,171 @@ columns_to_display = [
     "share_pct"
 ]
 
-print("\n========== TOP 10 COMMODITIES BY EXPORT INCREASE ==========")
+# print("\n========== TOP 10 COMMODITIES BY EXPORT INCREASE ==========")
 
-print(
-    top_absolute_gainers[columns_to_display].to_string(index=False)
+# print(
+#     top_absolute_gainers[columns_to_display].to_string(index=False)
+# )
+
+# print("\n========== TOP 10 COMMODITIES BY EXPORT DECREASE ==========")
+
+# print(
+#     top_absolute_decliners[columns_to_display].to_string(index=False)
+# )
+
+# print("\nAbsolute export change analysis completed.")
+
+
+# ==========================================
+# 11. EXPORT CONCENTRATION ANALYSIS
+# ==========================================
+
+concentration_results = []
+
+for year in sorted(df["financial_year"].unique()):
+
+    year_data = df[
+        df["financial_year"] == year
+    ].sort_values(
+        by="share_pct",
+        ascending=False
+    )
+
+    # Concentration ratios
+    cr5 = year_data.head(5)["share_pct"].sum()
+    cr10 = year_data.head(10)["share_pct"].sum()
+
+    # Herfindahl-Hirschman Index
+    hhi = (year_data["share_pct"] ** 2).sum()
+
+    concentration_results.append({
+        "financial_year": year,
+        "cr5_pct": cr5,
+        "cr10_pct": cr10,
+        "hhi": hhi
+    })
+
+concentration_df = pd.DataFrame(concentration_results)
+
+# print("\n========== EXPORT CONCENTRATION ANALYSIS ==========")
+
+# print(
+#     concentration_df.round(2).to_string(index=False)
+# )
+
+# print("\nExport concentration analysis completed.")
+
+
+# ==========================================
+# 12. EFFECTIVE NUMBER OF COMMODITY GROUPS
+# ==========================================
+
+concentration_df["effective_groups"] = (
+    10000 / concentration_df["hhi"]
 )
 
-print("\n========== TOP 10 COMMODITIES BY EXPORT DECREASE ==========")
+# print("\n========== EXPORT DIVERSIFICATION ANALYSIS ==========")
 
-print(
-    top_absolute_decliners[columns_to_display].to_string(index=False)
+# print(
+#     concentration_df[
+#         ["financial_year", "hhi", "effective_groups"]
+#     ].round(2).to_string(index=False)
+# )
+
+# print("\nEffective commodity group analysis completed.")
+
+
+# ==========================================
+# 13. COMMODITY CONTRIBUTION TO HHI
+# ==========================================
+
+# Compare HHI contributions across years
+hhi_contributions = df[
+    df["financial_year"].isin(["2021-22", "2022-23", "2025-26"])
+].copy()
+
+hhi_contributions["hhi_contribution"] = (
+    hhi_contributions["share_pct"] ** 2
 )
 
-print("\nAbsolute export change analysis completed.")
+hhi_pivot = hhi_contributions.pivot(
+    index=["hs_code", "commodity"],
+    columns="financial_year",
+    values="hhi_contribution"
+).reset_index()
+
+# Change in HHI contribution
+hhi_pivot["change_2021_22_to_2022_23"] = (
+    hhi_pivot["2022-23"] - hhi_pivot["2021-22"]
+)
+
+hhi_pivot["change_2022_23_to_2025_26"] = (
+    hhi_pivot["2025-26"] - hhi_pivot["2022-23"]
+)
+
+# Largest contributors to concentration increase
+top_hhi_increases = hhi_pivot.sort_values(
+    by="change_2021_22_to_2022_23",
+    ascending=False
+).head(10)
+
+# print("\n========== COMMODITIES DRIVING CONCENTRATION INCREASE ==========")
+
+# print(
+#     top_hhi_increases[
+#         ["hs_code", "commodity", "change_2021_22_to_2022_23"]
+#     ].round(2).to_string(index=False)
+# )
+
+# Largest contributors to concentration reduction
+top_hhi_reductions = hhi_pivot.sort_values(
+    by="change_2022_23_to_2025_26",
+    ascending=True
+).head(10)
+
+# print("\n========== COMMODITIES DRIVING CONCENTRATION REDUCTION ==========")
+
+# print(
+#     top_hhi_reductions[
+#         ["hs_code", "commodity", "change_2022_23_to_2025_26"]
+#     ].round(2).to_string(index=False)
+# )
+
+# print("\nHHI contribution analysis completed.")
+
+
+# ==========================================
+# 14. HHI RECONCILIATION CHECK
+# ==========================================
+
+# Sum contribution changes across all 98 commodities
+change_1 = hhi_pivot[
+    "change_2021_22_to_2022_23"
+].sum()
+
+change_2 = hhi_pivot[
+    "change_2022_23_to_2025_26"
+].sum()
+
+# Compare with aggregate HHI changes
+aggregate_change_1 = (
+    concentration_df.loc[1, "hhi"]
+    - concentration_df.loc[0, "hhi"]
+)
+
+aggregate_change_2 = (
+    concentration_df.loc[4, "hhi"]
+    - concentration_df.loc[1, "hhi"]
+)
+
+print("\n========== HHI RECONCILIATION CHECK ==========")
+
+print(f"2021-22 to 2022-23:")
+print(f"Sum of commodity contributions: {change_1:.2f}")
+print(f"Aggregate HHI change:           {aggregate_change_1:.2f}")
+
+print(f"\n2022-23 to 2025-26:")
+print(f"Sum of commodity contributions: {change_2:.2f}")
+print(f"Aggregate HHI change:           {aggregate_change_2:.2f}")
+
+print("\nHHI reconciliation completed.")
