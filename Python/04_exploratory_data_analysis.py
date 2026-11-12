@@ -600,14 +600,219 @@ aggregate_change_2 = (
     - concentration_df.loc[1, "hhi"]
 )
 
-print("\n========== HHI RECONCILIATION CHECK ==========")
+# print("\n========== HHI RECONCILIATION CHECK ==========")
 
-print(f"2021-22 to 2022-23:")
-print(f"Sum of commodity contributions: {change_1:.2f}")
-print(f"Aggregate HHI change:           {aggregate_change_1:.2f}")
+# print(f"2021-22 to 2022-23:")
+# print(f"Sum of commodity contributions: {change_1:.2f}")
+# print(f"Aggregate HHI change:           {aggregate_change_1:.2f}")
 
-print(f"\n2022-23 to 2025-26:")
-print(f"Sum of commodity contributions: {change_2:.2f}")
-print(f"Aggregate HHI change:           {aggregate_change_2:.2f}")
+# print(f"\n2022-23 to 2025-26:")
+# print(f"Sum of commodity contributions: {change_2:.2f}")
+# print(f"Aggregate HHI change: {aggregate_change_2:.2f}")
+# print("\nHHI reconciliation completed.")
 
-print("\nHHI reconciliation completed.")
+
+# ============================================================
+# SECTION 15: AGGREGATE EXPORT CHANGE AND COMMODITY CONTRIBUTION
+# ============================================================
+
+# print("\n========== SECTION 15: AGGREGATE EXPORT CHANGE ==========")
+
+# Load the processed master dataset
+section15_data = pd.read_csv(
+    "DATA/Processed_Data/india_foreign_trade_master.csv",
+    dtype={"hs_code": str}
+)
+
+# Select the initial and final financial years
+start_year = "2021-22"
+end_year = "2025-26"
+
+start_exports = (
+    section15_data[section15_data["financial_year"] == start_year]
+    .set_index("hs_code")["export_value_usd_mn"]
+)
+
+end_exports = (
+    section15_data[section15_data["financial_year"] == end_year]
+    .set_index("hs_code")["export_value_usd_mn"]
+)
+
+# Compare export values for each commodity group
+commodity_change = pd.DataFrame({
+    "export_2021_22": start_exports,
+    "export_2025_26": end_exports
+})
+
+# Calculate absolute export change
+commodity_change["export_change_usd_mn"] = (
+    commodity_change["export_2025_26"]
+    - commodity_change["export_2021_22"]
+)
+
+# Classify commodity groups based on export change
+commodity_change["change_status"] = commodity_change[
+    "export_change_usd_mn"
+].apply(
+    lambda x: "Increased" if x > 0
+    else ("Decreased" if x < 0 else "Unchanged")
+)
+
+# Count commodity groups in each category
+change_counts = (
+    commodity_change["change_status"]
+    .value_counts()
+    .reindex(["Increased", "Decreased", "Unchanged"], fill_value=0)
+)
+
+# print("\nCommodity Group Classification (2021-22 to 2025-26):")
+# print(change_counts.to_string())
+
+# print("\nTotal commodity groups:", len(commodity_change))
+
+# Calculate total positive and negative export changes
+positive_change = commodity_change.loc[
+    commodity_change["export_change_usd_mn"] > 0,
+    "export_change_usd_mn"
+].sum()
+
+negative_change = commodity_change.loc[
+    commodity_change["export_change_usd_mn"] < 0,
+    "export_change_usd_mn"
+].sum()
+
+# Calculate the net change across all commodity groups
+net_commodity_change = commodity_change[
+    "export_change_usd_mn"
+].sum()
+
+# Calculate the overall change in merchandise exports
+total_exports_start = start_exports.sum()
+total_exports_end = end_exports.sum()
+
+overall_export_change = total_exports_end - total_exports_start
+
+# Reconcile commodity-level changes with overall export change
+reconciliation_difference = (
+    net_commodity_change - overall_export_change
+)
+
+# print("\n========== EXPORT CHANGE CONTRIBUTION ANALYSIS ==========")
+
+# print(
+#     f"\nTotal positive contribution: "
+#     f"USD {positive_change:,.2f} million"
+# )
+
+# print(
+#     f"Total negative contribution: "
+#     f"USD {negative_change:,.2f} million"
+# )
+
+# print(
+#     f"Net change across 98 commodity groups: "
+#     f"USD {net_commodity_change:,.2f} million"
+# )
+
+# print(
+#     f"\nTotal exports in {start_year}: "
+#     f"USD {total_exports_start:,.2f} million"
+# )
+
+# print(
+#     f"Total exports in {end_year}: "
+#     f"USD {total_exports_end:,.2f} million"
+# )
+
+# print(
+#     f"Overall merchandise export change: "
+#     f"USD {overall_export_change:,.2f} million"
+# )
+
+# print(
+#     f"\nReconciliation difference: "
+#     f"USD {reconciliation_difference:,.6f} million"
+# )
+
+
+# ============================================================
+# SECTION 16: CONCENTRATION OF POSITIVE EXPORT CONTRIBUTIONS
+# ============================================================
+
+# print("\n========== SECTION 16: POSITIVE CONTRIBUTION CONCENTRATION ==========")
+
+# Select commodity groups with positive export changes
+positive_changes = (
+    commodity_change.loc[
+        commodity_change["export_change_usd_mn"] > 0,
+        "export_change_usd_mn"
+    ]
+    .sort_values(ascending=False)
+)
+
+# Total positive contribution
+total_positive = positive_changes.sum()
+
+# HS 85 contribution
+hs85_change = commodity_change.loc["85", "export_change_usd_mn"]
+hs85_share = (hs85_change / total_positive) * 100
+
+# Combined contribution of top 5 and top 10 groups
+top5_contribution = positive_changes.head(5).sum()
+top10_contribution = positive_changes.head(10).sum()
+
+top5_share = (top5_contribution / total_positive) * 100
+top10_share = (top10_contribution / total_positive) * 100
+
+# print(f"\nTotal positive contribution: USD {total_positive:,.2f} million")
+
+# print("\nHS 85 - Electrical Machinery:")
+# print(f"Export change: USD {hs85_change:,.2f} million")
+# print(f"Share of positive contribution: {hs85_share:.2f}%")
+
+# print("\nTop 5 commodity groups:")
+# print(f"Combined contribution: USD {top5_contribution:,.2f} million")
+# print(f"Share of positive contribution: {top5_share:.2f}%")
+
+# print("\nTop 10 commodity groups:")
+# print(f"Combined contribution: USD {top10_contribution:,.2f} million")
+# print(f"Share of positive contribution: {top10_share:.2f}%")
+
+# ============================================================
+# FINAL EDA SUMMARY
+# ============================================================
+
+print("\n========== FINAL EDA SUMMARY ==========")
+
+# Dataset overview
+print("\nDATASET OVERVIEW")
+print(f"Financial years analysed: {section15_data['financial_year'].nunique()}")
+print(f"Commodity groups analysed: {len(commodity_change)}")
+
+# Overall export performance
+print("\nEXPORT PERFORMANCE")
+print(f"2021-22 exports: USD {total_exports_start:,.2f} million")
+print(f"2025-26 exports: USD {total_exports_end:,.2f} million")
+print(f"Net export change: USD {overall_export_change:,.2f} million")
+
+# Commodity contribution
+print("\nCOMMODITY CONTRIBUTION")
+print(f"Increased: {change_counts['Increased']}")
+print(f"Decreased: {change_counts['Decreased']}")
+print(f"Unchanged: {change_counts['Unchanged']}")
+
+# Positive contribution concentration
+print("\nPOSITIVE CONTRIBUTION CONCENTRATION")
+print(f"HS 85 contribution: {hs85_share:.2f}%")
+print(f"Top 5 contribution: {top5_share:.2f}%")
+print(f"Top 10 contribution: {top10_share:.2f}%")
+
+# Export concentration
+latest_concentration = concentration_df.iloc[-1]
+
+print("\nEXPORT CONCENTRATION (2025-26)")
+print(f"CR5: {latest_concentration['cr5_pct']:.2f}%")
+print(f"CR10: {latest_concentration['cr10_pct']:.2f}%")
+print(f"HHI: {latest_concentration['hhi']:.2f}")
+
+print("\n========== EDA COMPLETED ==========")
