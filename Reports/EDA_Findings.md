@@ -5,9 +5,8 @@
 **Analysis period:** FY 2021–22 to FY 2025–26  
 **Dataset:** India's commodity-wise merchandise exports  
 **Commodity coverage:** 98 HS commodity groups (HS 01–99 as represented in the dataset)  
-**Technology:** Python, Pandas
-
-**Document status:** EDA in progress
+**Technology:** Python, Pandas  
+**Document status:** Core quantitative EDA complete; supplementary research pending.
 
 ---
 
@@ -26,7 +25,7 @@ The processed master dataset contains:
 - 490 observations.
 - 98 commodity groups per financial year.
 - Five financial years.
-- Six columns: financial_year, hs_code, commodity, export_value_usd_mn, share_pct and growth_pct.
+- Six columns: `financial_year`, `hs_code`, `commodity`, `export_value_usd_mn`, `share_pct` and `growth_pct`.
 
 ### Data validation results
 
@@ -58,7 +57,7 @@ The 2021–22 growth rate is calculated against the verified 2020–21 merchandi
 - Highest annual exports were recorded in 2022–23.
 - Exports declined in 2023–24.
 - Exports recovered modestly during 2024–25 and 2025–26.
-- Overall merchandise exports increased by approximately USD 19.45 billion between 2021–22 and 2025–26.
+- Overall merchandise exports increased by USD 19,447.79 million between 2021–22 and 2025–26.
 
 ## 4. Major Export Commodity Groups
 
@@ -66,12 +65,12 @@ The ten largest export commodity groups in 2025–26 accounted for approximately
 
 Leading categories included:
 
-1. Mineral fuels and oils (HS 27): USD 55.87 billion.
-2. Electrical machinery (HS 85): USD 53.98 billion.
-3. Machinery and mechanical appliances (HS 84): USD 36.63 billion.
-4. Precious stones and jewellery (HS 71): USD 28.34 billion.
-5. Vehicles (HS 87): USD 25.97 billion.
-6. Pharmaceuticals (HS 30): USD 25.07 billion.
+1. Mineral fuels and oils (HS 27): USD 55,871.34 million.
+2. Electrical machinery (HS 85): USD 53,976.30 million.
+3. Machinery and mechanical appliances (HS 84): USD 36,629.61 million.
+4. Precious stones and jewellery (HS 71): USD 28,343.84 million.
+5. Vehicles (HS 87): USD 25,973.36 million.
+6. Pharmaceuticals (HS 30): USD 25,073.39 million.
 
 The top two categories, HS 27 and HS 85, together accounted for approximately 24.88% of exports.
 
@@ -86,7 +85,7 @@ The CAGR analysis compared export values between 2021–22 and 2025–26 using f
 - Vehicles (HS 87) recorded a CAGR of 7.07%.
 - Pharmaceuticals (HS 30) recorded a CAGR of 6.63%.
 
-Electrical machinery was particularly significant because its exports increased by approximately USD 33.80 billion and its export share rose from 4.78% to 12.23%.
+Electrical machinery was particularly significant because its exports increased by USD 33,797.56 million and its export share rose from 4.78% to 12.23%.
 
 ### Major declining categories
 
@@ -123,9 +122,9 @@ The findings indicate that export growth was uneven across commodity groups, wit
 
 Three principal indicators were used:
 
-- CR5: Combined export share of the five largest commodity groups.
-- CR10: Combined export share of the ten largest commodity groups.
-- HHI: Herfindahl-Hirschman Index, calculated as the sum of squared commodity export shares expressed in percentage units.
+- **CR5:** Combined export share of the five largest commodity groups.
+- **CR10:** Combined export share of the ten largest commodity groups.
+- **HHI:** Herfindahl-Hirschman Index, calculated as the sum of squared commodity export shares expressed in percentage units.
 
 ### Five-year results
 
@@ -157,9 +156,88 @@ Mineral fuels (HS 27) contributed +231.99 points to this increase, making it the
 
 Between 2022–23 and 2025–26, HHI declined by 211.77 points. Mineral fuels contributed -343.59 points to this decline, followed by precious stones and jewellery (HS 71) at -30.17 points.
 
-The sum of individual commodity contribution changes matched the aggregate HHI changes in both periods, validating the decomposition.
+### HHI reconciliation check
 
-## 8. Data Anomalies and Research Questions
+The sum of individual commodity contributions was compared against the aggregate HHI change for both periods.
+
+| Period | Sum of Commodity Contributions | Aggregate HHI Change |
+|---|---:|---:|
+| 2021–22 to 2022–23 | +196.81 | +196.81 |
+| 2022–23 to 2025–26 | -211.77 | -211.77 |
+
+Both calculations matched to two decimal places.
+
+This reconciliation confirms the arithmetic consistency of the commodity-level HHI decomposition. It does not independently establish the underlying economic reasons for the changes.
+
+## 8. Aggregate Export Change and Commodity Contribution
+
+This analysis compares the export values of all 98 commodity groups in 2021–22 and 2025–26 to identify how broadly export gains and losses were distributed.
+
+### Commodity group classification
+
+| Change Status | Number of Commodity Groups |
+|---|---:|
+| Increased | 66 |
+| Decreased | 32 |
+| Unchanged | 0 |
+| **Total** | **98** |
+
+Approximately 67.35% of commodity groups recorded an increase in export value, while 32.65% recorded a decline.
+
+### Contribution to overall export change
+
+| Contribution | Export Change (USD million) |
+|---|---:|
+| Total positive contribution (66 groups) | +78,860.56 |
+| Total negative contribution (32 groups) | -59,412.77 |
+| **Net change across all 98 groups** | **+19,447.79** |
+
+### Reconciliation with overall merchandise exports
+
+| Metric | Export Value (USD million) |
+|---|---:|
+| Total exports in 2021–22 | 422,004.40 |
+| Total exports in 2025–26 | 441,452.19 |
+| Overall export change | +19,447.79 |
+| Net change across 98 commodity groups | +19,447.79 |
+
+The difference between the aggregate export change and the sum of commodity-level changes was effectively zero, confirming the reconciliation.
+
+### Key findings
+
+- A larger number of commodity groups recorded increases than decreases.
+- The combined positive contribution was substantially offset by declines in other commodity groups.
+- Despite these declines, the net change in exports remained positive at USD 19,447.79 million.
+
+This comparison measures the difference between the initial and final financial years. It does not imply that every increasing commodity group grew continuously throughout the intervening years.
+
+## 9. Concentration of Positive Export Contributions
+
+This analysis examines whether the positive export changes recorded by the 66 increasing commodity groups were broadly distributed or concentrated among a smaller number of groups.
+
+The total positive contribution of USD 78,860.56 million is used as the denominator for calculating contribution shares.
+
+### Results
+
+| Contributor | Combined Export Change (USD million) | Share of Total Positive Contribution |
+|---|---:|---:|
+| Electrical machinery (HS 85) | 33,797.56 | 42.86% |
+| Top 5 commodity groups | 58,746.87 | 74.49% |
+| Top 10 commodity groups | 66,369.82 | 84.16% |
+
+The remaining 56 increasing commodity groups collectively contributed USD 12,490.74 million, representing approximately 15.84% of the total positive contribution.
+
+### Key findings
+
+1. Electrical machinery (HS 85) alone accounted for 42.86% of the total positive export contribution.
+2. The five largest positive contributors accounted for 74.49% of the total.
+3. The ten largest positive contributors accounted for 84.16% of the total.
+
+These results indicate that positive export contributions were concentrated among a relatively small number of commodity groups, particularly electrical machinery.
+
+**Interpretation note:** These percentages measure the distribution of positive contributions only. They are not percentages of the net export increase of USD 19,447.79 million.
+
+## 10. Data Anomalies and Research Questions
 
 ### HS 99 – Miscellaneous Goods
 
@@ -175,26 +253,25 @@ The arithmetic and cleaning correction have been checked. However, the underlyin
 
 HS 99 has been retained in the dataset without adjustment.
 
-## 9. Methodological Limitations
+## 11. Methodological Limitations
 
 - The analysis covers merchandise exports, not services exports.
 - Values are expressed in nominal USD and do not measure physical export volumes.
 - The dataset uses 98 HS commodity groups, so it does not capture diversification within individual groups.
 - Commodity diversification does not establish destination-market or firm-level diversification.
 - Growth in export value or share alone does not establish international competitiveness.
+- Endpoint comparisons do not describe every annual movement within the five-year period.
 - Economic explanations for major changes require further research and supporting evidence.
 
-## 10. Further Work
+## 12. Further Work
 
-The following activities remain planned:
+The remaining project activities are:
 
-- Investigate major commodity-level movements using official sources.
-- Examine HS 99 and other unusual movements.
-- Conduct additional analysis of export concentration and diversification where useful.
-- Develop SQL-based analytical queries.
-- Build an interactive Power BI dashboard.
+- Investigate HS 99 and other unusual commodity movements using official sources.
+- Develop SQL-based analytical queries to reproduce and extend selected findings.
+- Build an interactive Power BI dashboard to present the major export trends and analytical findings.
 - Prepare a final research report with conclusions and visualizations.
 
 ---
 
-**Report status:** Preliminary analytical findings. This document will be updated as the project progresses.
+**Report status:** Core quantitative EDA completed. The findings document the main descriptive and concentration-related patterns in India's commodity-wise merchandise exports. Supplementary investigation of unresolved anomalies and further project development remain pending.
